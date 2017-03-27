@@ -12,11 +12,28 @@
 #define MAX_MSG 100
 
 
+void lire(char *nom,char *donne){
+
+	
+	FILE *fp;
+	fp = fopen(nom , "rb");
+	fseek( fp , 0 , SEEK_END );
+	int file_size = ftell(fp);
+	fseek( fp , 0 , SEEK_SET);
+	fread( donne , file_size , sizeof(char) , fp);
+	donne[file_size] = '\0';
+	fclose(fp);
+}
+
+
+
+
+
 int main(int argc,char *argv[]){
 	int sd,rc,i;
 	struct sockaddr_in localAddr,servAddr;
 	struct hostent *h;
-	
+	char donne[MAX_MSG];
 	if(argc<3){
 		printf("usage %s <server> <data1> <data2> ... <dataN>\n",argv[0]);
 		exit(1);
@@ -51,7 +68,6 @@ int main(int argc,char *argv[]){
 		exit(1);	
 	}	
 
-
 	/*connect to server*/
 	rc=connect(sd,(struct sockaddr *)&servAddr,sizeof(servAddr));
 	if(rc<0){
@@ -59,7 +75,8 @@ int main(int argc,char *argv[]){
 		exit(1);
 	}
 	for(i=2;i<argc;i++){
-        rc=send(sd,argv[i],strlen(argv[i])+1,0);
+		lire(argv[i],donne);
+        rc=send(sd,donne,strlen(donne)+1,0);
 		if(rc<0){
             printf("%i\n",i);
 			perror("cannot send date");

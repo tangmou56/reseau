@@ -11,4 +11,4 @@ clean:
 	rm client
 	rm server
 	rm *.o
-
+	rm data_recv*

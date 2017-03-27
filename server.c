@@ -14,12 +14,29 @@
 #define SERVER_PORT 1500
 #define MAX_MSG 100
 
+void creer_fichier(char *donne,int n){
+	char nb[20];
+	sprintf(nb, "%d", n);
+	char nom[20]="data_recv";
+	strcat(nom,nb);
+	FILE *fic;
+	fic=fopen(nom,"w");
+	fprintf(fic,"%s",donne);
+	fclose(fic);
+	printf("fichier %s enregistre\n",nom);
+}
+
+
+
+
+
+
 
 int main(int argc,char *argv[]){
 	int sd,newSd,cliLen;
 	struct sockaddr_in cliAddr,servAddr;
 	char line[MAX_MSG];
-    int n;
+    int n=1;
     char rcv_msg[MAX_MSG];
 
 	/*Creat Socket*/
@@ -30,11 +47,11 @@ int main(int argc,char *argv[]){
 	}
 
 
-
 	/* bind server port*/
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(SERVER_PORT);
+
 	
 
 	if(bind(sd,(struct sockaddr *)&servAddr,sizeof(servAddr))<0){
@@ -56,8 +73,12 @@ int main(int argc,char *argv[]){
           
 	memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
           
-	while( recv(newSd,rcv_msg,MAX_MSG,0)  > 0)/* wait for data */
-        printf("%s : received from %s :TCP%d : %s\n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port),rcv_msg);
+		  while( recv(newSd,rcv_msg,MAX_MSG,0)  > 0){/* wait for data */
+			  creer_fichier(rcv_msg,n);
+			  n++;
+		  
+		  }
+        /*printf("%s : received from %s :TCP%d : %s\n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port),rcv_msg);*/
 	
 	/*init line*/
 	memset(rcv_msg,0x0,MAX_MSG);
