@@ -19,7 +19,8 @@ int main(int argc,char *argv[]){
 	int sd,newSd,cliLen;
 	struct sockaddr_in cliAddr,servAddr;
 	char line[MAX_MSG];
-	
+    int n;
+    char rcv_msg[MAX_MSG];
 
 	/*Creat Socket*/
 	sd=socket(AF_INET,SOCK_STREAM,0);
@@ -50,17 +51,17 @@ int main(int argc,char *argv[]){
 			perror("cannot accept connection");
 			return ERROR;			
 		}		
-	  
-	/*init line */
-	memset(line,0x0,MAX_MSG);
-	
+
 	/*recive segments*/
+          
 	memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
-	n = recv(newSd,rcv_msg,MAX_MSG,0);/* wait for data */
-	printf("%s : received from %s :TCP%d : %s\n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port),line);
+          
+	while( recv(newSd,rcv_msg,MAX_MSG,0)  > 0)/* wait for data */
+        printf("%s : received from %s :TCP%d : %s\n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port),rcv_msg);
 	
 	/*init line*/
-	memset(line,0x0,MAX_MSG);
+	memset(rcv_msg,0x0,MAX_MSG);
+          
 	  }/*while(1)*/
 
 }

@@ -5,6 +5,8 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <unistd.h> /*close*/
+#include <string.h>
+#include <stdlib.h>
 
 #define SERVER_PORT 1500
 #define MAX_MSG 100
@@ -22,13 +24,13 @@ int main(int argc,char *argv[]){
 
 	}
 	h=gethostbyname(argv[1]);
-	if(h=NULL){
+	if(h==NULL){
 		printf("%s unknown host '%s'\n",argv[0],argv[1]);
 		exit(1);	
 	}
 	servAddr.sin_family = h->h_addrtype;
 	memcpy((char *)&servAddr.sin_addr.s_addr,h->h_addr_list[0],h->h_length);
-	servAddr.sin_port=htons(SERVER_PROT);
+	servAddr.sin_port=htons(SERVER_PORT);
 	
 	/* creat socket*/
 	sd = socket(AF_INET,SOCK_STREAM,0);
@@ -57,18 +59,16 @@ int main(int argc,char *argv[]){
 		exit(1);
 	}
 	for(i=2;i<argc;i++){
-		rc=send(sd,argv[i],strlen(argv[i]+1),0)
+        rc=send(sd,argv[i],strlen(argv[i])+1,0);
 		if(rc<0){
+            printf("%i\n",i);
 			perror("cannot send date");
 			close(sd);
 			exit(1);		
 		}	
 		printf("%s : data %u sent (%s)\n",argv[0],i-1,argv[i]);
+
+    }
 		return 0;
-
-
-
-	}
-
 
 }/* main */
