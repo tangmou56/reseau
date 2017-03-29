@@ -26,7 +26,9 @@ void lire(char *nom,char *donne){
 }
 
 
-
+void print_sockaddr(struct sockaddr_in n){
+	printf("sin_family: %i\nsin_port: %i\nsin_addr: %s\n",n.sin_family,ntohs(n.sin_port), inet_ntoa(n.sin_addr));
+}
 
 
 int main(int argc,char *argv[]){
@@ -85,7 +87,14 @@ int main(int argc,char *argv[]){
 		}	
 		printf("%s : data %u sent (%s)\n",argv[0],i-1,argv[i]);
 
-    }
+    }	
+	printf("--------local----------\n");
+ 	print_sockaddr(localAddr);
+	printf("--------server---------\n");
+	print_sockaddr(servAddr);
+
+
+
 		return 0;
 
 }/* main */

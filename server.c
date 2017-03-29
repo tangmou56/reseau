@@ -14,6 +14,11 @@
 #define SERVER_PORT 1500
 #define MAX_MSG 100
 
+
+void print_sockaddr(struct sockaddr_in n){
+	printf("sin_family: %i\nsin_port: %i\nsin_addr: %s\n",n.sin_family,ntohs(n.sin_port), inet_ntoa(n.sin_addr));
+}
+
 void creer_fichier(char *donne,int n){
 	char nb[20];
 	sprintf(nb, "%d", n);
@@ -78,6 +83,10 @@ int main(int argc,char *argv[]){
 			  n++;
 		  
 		  }
+	printf("--------client----------\n");
+ 	print_sockaddr(cliAddr);
+	printf("--------server---------\n");
+	print_sockaddr(servAddr);
         /*printf("%s : received from %s :TCP%d : %s\n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port),rcv_msg);*/
 	
 	/*init line*/
