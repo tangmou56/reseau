@@ -5,13 +5,13 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <unistd.h> /*close*/
-
-
+#include <string.h>
+#include <stdlib.h>
 #define SUCCESS 0
 #define ERROR 1
 
 #define END_LINE 0x0
-#define SERVER_PORT 1500
+#define SERVER_PORT 1502
 #define MAX_MSG 100
 
 
@@ -21,6 +21,7 @@ void print_sockaddr(struct sockaddr_in n){
 
 void creer_fichier(char *donne,int n){
 	char nb[20];
+	
 	sprintf(nb, "%d", n);
 	char nom[20]="data_recv";
 	strcat(nom,nb);
@@ -40,10 +41,9 @@ void creer_fichier(char *donne,int n){
 int main(int argc,char *argv[]){
 	int sd,newSd,cliLen;
 	struct sockaddr_in cliAddr,servAddr;
-	char line[MAX_MSG];
-    int n=1;
+	char donne[MAX_MSG];
     char rcv_msg[MAX_MSG];
-
+	int rc;
 	/*Creat Socket*/
 	sd=socket(AF_INET,SOCK_STREAM,0);
 	 if(sd<0){
@@ -65,33 +65,32 @@ int main(int argc,char *argv[]){
 	}
 
 	listen(sd,5);
+	printf("%s : waiting for data on port TCP %u\n",argv[0],SERVER_PORT);
+	cliLen = sizeof(cliAddr);
+	newSd= accept(sd,(struct sockaddr *)&cliAddr,&cliLen);
+	if(newSd<0){
+		perror("cannot accept connection");
+		return ERROR;
+	}
 	  while(1){
-		printf("%s : waiting for data on port TCP %u\n",argv[0],SERVER_PORT);
-		cliLen = sizeof(cliAddr);
-		newSd= accept(sd,(struct sockaddr *)&cliAddr,&cliLen);
-		if(newSd<0){
-			perror("cannot accept connection");
-			return ERROR;			
-		}		
-
-	/*recive segments*/
-          
-	memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
-          
-		  while( recv(newSd,rcv_msg,MAX_MSG,0)  > 0){/* wait for data */
-			  creer_fichier(rcv_msg,n);
-			  n++;
-		  
+		  printf("waiting for data...\n");
+		  memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
+		  recv(newSd,rcv_msg,MAX_MSG,0);/* wait for data */
+		  printf("message recu:%s\n",rcv_msg);
+		  /*init line*/
+		  memset(rcv_msg,0x0,MAX_MSG);
+		  printf("Saisir le message : ");
+		  scanf("%s",donne);
+		  if(!strcmp(donne,"q")){
+			  close(sd);
+			  exit(1);
 		  }
-	printf("--------client----------\n");
- 	print_sockaddr(cliAddr);
-	printf("--------server---------\n");
-	print_sockaddr(servAddr);
-        /*printf("%s : received from %s :TCP%d : %s\n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port),rcv_msg);*/
-	
-	/*init line*/
-	memset(rcv_msg,0x0,MAX_MSG);
-          
+		  rc=send(newSd,donne,strlen(donne)+1,0);
+		  if(rc<0){
+			  perror("cannot send date");
+			  close(newSd);
+			  exit(1);
+		  }
 	  }/*while(1)*/
 
 }

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define SERVER_PORT 1500
+#define SERVER_PORT 1502
 #define MAX_MSG 100
 
 
@@ -32,12 +32,13 @@ void print_sockaddr(struct sockaddr_in n){
 
 
 int main(int argc,char *argv[]){
-	int sd,rc,i;
+	int sd,rc;
 	struct sockaddr_in localAddr,servAddr;
 	struct hostent *h;
 	char donne[MAX_MSG];
-	if(argc<3){
-		printf("usage %s <server> <data1> <data2> ... <dataN>\n",argv[0]);
+	char rcv_msg[MAX_MSG];
+	if(argc<2){
+		printf("usage %s <server>\n",argv[0]);
 		exit(1);
 		
 
@@ -76,22 +77,33 @@ int main(int argc,char *argv[]){
 		perror("cannot connect");
 		exit(1);
 	}
-	for(i=2;i<argc;i++){
-		lire(argv[i],donne);
-        rc=send(sd,donne,strlen(donne)+1,0);
+
+	while(1){
+		printf("Saisir le message : ");
+		scanf("%s",donne);
+		if(!strcmp(donne,"q")){
+			close(sd);
+			exit(1);
+		}
+		rc=send(sd,donne,strlen(donne)+1,0);
+		
+		
 		if(rc<0){
-            printf("%i\n",i);
 			perror("cannot send date");
 			close(sd);
-			exit(1);		
-		}	
-		printf("%s : data %u sent (%s)\n",argv[0],i-1,argv[i]);
-
-    }	
-	printf("--------local----------\n");
- 	print_sockaddr(localAddr);
-	printf("--------server---------\n");
-	print_sockaddr(servAddr);
+			exit(1);
+		}
+		
+		
+		memset(rcv_msg,0x0,MAX_MSG);
+		printf("waiting for data...\n");
+		recv(sd,rcv_msg,MAX_MSG,0);/* wait for data */
+		printf("message recu:%s\n",rcv_msg);
+		/*init line*/
+		memset(rcv_msg,0x0,MAX_MSG);
+			
+		
+	}
 
 
 
