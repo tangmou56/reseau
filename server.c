@@ -7,11 +7,12 @@
 #include <unistd.h> /*close*/
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #define SUCCESS 0
 #define ERROR 1
 
 #define END_LINE 0x0
-#define SERVER_PORT 1502
+
 #define MAX_MSG 100
 
 
@@ -42,8 +43,12 @@ int main(int argc,char *argv[]){
 	int sd,newSd,cliLen;
 	struct sockaddr_in cliAddr,servAddr;
 	char donne[MAX_MSG];
-    char rcv_msg[MAX_MSG];
-	int rc;
+   	char rcv_msg[MAX_MSG];
+	int rc,n,jeu=0,choix=0;
+
+	struct  timeval start;
+        struct  timeval end;
+	unsigned  long diff;
 	/*Creat Socket*/
 	sd=socket(AF_INET,SOCK_STREAM,0);
 	 if(sd<0){
@@ -51,7 +56,14 @@ int main(int argc,char *argv[]){
 		return ERROR;	
 	}
 
+	if(argc<2){
+		printf("usage %s <port>\n",argv[0]);
+		exit(1);
+		
 
+	}
+
+	int SERVER_PORT=atoi(argv[1]);
 	/* bind server port*/
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -72,25 +84,57 @@ int main(int argc,char *argv[]){
 		perror("cannot accept connection");
 		return ERROR;
 	}
-	  while(1){
+
+	/*init line*/
+	printf("envoyer 10 nombres:\n");
+	for(n=0;n<10;n++){
+		printf("Nombre %i : ",n);
+		sprintf(donne, "%d", rand()%49);
+		gettimeofday(&start,NULL);
+		rc=send(newSd,donne,strlen(donne)+1,0);
+		gettimeofday(&end,NULL);
+		diff = 1000000 * (end.tv_sec-start.tv_sec)+ end.tv_usec-start.tv_usec;
+		printf("temps de aller retour est %ld micro second\n",diff);
+		sleep(1);
+	}
+		
+
+	  while(jeu==0){
 		  printf("waiting for data...\n");
 		  memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
 		  recv(newSd,rcv_msg,MAX_MSG,0);/* wait for data */
 		  printf("message recu:%s\n",rcv_msg);
-		  /*init line*/
-		  memset(rcv_msg,0x0,MAX_MSG);
-		  printf("Saisir le message : ");
-		  scanf("%s",donne);
-		  if(!strcmp(donne,"q")){
-			  close(sd);
-			  exit(1);
+		  if(!strcmp(rcv_msg,"jeu")){
+			jeu=1;
 		  }
-		  rc=send(newSd,donne,strlen(donne)+1,0);
-		  if(rc<0){
-			  perror("cannot send date");
-			  close(newSd);
-			  exit(1);
-		  }
-	  }/*while(1)*/
+		if(jeu==0){
+			  /*init line*/
+			  memset(rcv_msg,0x0,MAX_MSG);
+			  sprintf(donne, "%d", rand()%49);
+			  if(!strcmp(donne,"q")){
+				  close(sd);
+				  exit(1);
+			  }
+			  rc=send(newSd,donne,strlen(donne)+1,0);
+			  if(rc<0){
+				  perror("cannot send date");
+				  close(newSd);
+				  exit(1);
+			  }
+		}
+	  }/*while(jeu==0)*/
+	printf("Jeu commence\n");
+	while(jeu==1){
+		sprintf(donne, "%d", rand()%2+1);
+		rc=send(newSd,donne,strlen(donne)+1,0);
+		printf("waiting for another player...\n");
+		memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
+		recv(newSd,rcv_msg,MAX_MSG,0);/* wait for data */
+		printf("message recu:%s\n",rcv_msg);
+		if(!strcmp(rcv_msg,"fini"))
+			jeu=0;
+	}
+	printf("Jeu fini\n");
+	return 0;
 
 }
