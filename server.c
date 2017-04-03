@@ -88,13 +88,22 @@ int main(int argc,char *argv[]){
 	/*init line*/
 	printf("envoyer 10 nombres:\n");
 	for(n=0;n<10;n++){
-		printf("Nombre %i : ",n);
+		printf("Nombre envoyé %i : ",n);
 		sprintf(donne, "%d", rand()%49);
 		gettimeofday(&start,NULL);
 		rc=send(newSd,donne,strlen(donne)+1,0);
 		gettimeofday(&end,NULL);
 		diff = 1000000 * (end.tv_sec-start.tv_sec)+ end.tv_usec-start.tv_usec;
-		printf("temps de aller retour est %ld micro second\n",diff);
+		printf(" %ld micro second\n",diff);
+		
+
+		memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
+		gettimeofday(&start,NULL);
+		recv(newSd,rcv_msg,MAX_MSG,0);/* wait for data */
+		gettimeofday(&end,NULL);
+		memset(rcv_msg,0x0,MAX_MSG);/*init buffer*/
+		diff = 1000000 * (end.tv_sec-start.tv_sec)+ end.tv_usec-start.tv_usec;
+		printf("reponse reçu : %ld micro second\n",diff);
 		sleep(1);
 	}
 		

@@ -115,8 +115,9 @@ int main(int argc,char *argv[]){
 		  memset(rcv_msg,0x0,MAX_MSG);
 		  recv(sd,rcv_msg,MAX_MSG,0);
 		  printf("message recu:%s\n",rcv_msg);
-		 
 		  memset(rcv_msg,0x0,MAX_MSG);
+		  printf("envoyer une reponse...\n");
+		  rc=send(sd,"reponse",strlen("reponse")+1,0);
 	}
 
 
